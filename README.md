@@ -2,7 +2,18 @@
 
 Import an Excel sheet or paste URL links; the app downloads everything and gives you a single ZIP. **Runs with Node.js only** (no Python).
 
-## Get a live URL (hosted so you can just use it)
+**Repo:** [github.com/lamtrang2405/download-url](https://github.com/lamtrang2405/download-url)
+
+## GitHub Pages (landing page)
+
+To turn on the landing page at **https://lamtrang2405.github.io/download-url/**:
+
+1. Open the repo → **Settings** → **Pages**.
+2. Under **Build and deployment**, set **Source** to **Deploy from a branch**.
+3. Branch: **main**, Folder: **/ (root)** → **Save**.
+4. After a minute, the page will be live with a “Deploy free on Render” button.
+
+## Get a live app URL (the actual downloader)
 
 See **[HOSTING.md](HOSTING.md)** for the shortest way to get a public URL:
 
