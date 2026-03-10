@@ -38,19 +38,33 @@
     return out;
   }
 
-  /** CSV text -> array of { url, name }. Column 1 = URL, Column 2 = filename. */
+  /** Split line: TSV (tab), or semicolon (no comma), or CSV. Returns [url, name] cells. */
+  function parseRow(line) {
+    if (line.indexOf('\t') >= 0) {
+      var t = line.split('\t');
+      return [(t[0] || '').trim(), (t[1] || '').trim()];
+    }
+    if (line.indexOf(';') >= 0 && line.indexOf(',') === -1) {
+      var s = line.split(';');
+      return [(s[0] || '').trim(), (s[1] || '').trim()];
+    }
+    var cells = parseCSVLine(line);
+    return [(cells[0] || '').trim(), (cells[1] || '').trim()];
+  }
+
+  /** CSV/TSV text -> array of { url, name }. Column 1 = URL, Column 2 = filename. */
   function parseCSVToEntries(text) {
     var lines = text.split(/\r?\n/).filter(function (l) { return l.trim(); });
     var entries = [];
     var start = 0;
     if (lines.length && lines[0]) {
-      var firstCell = parseCSVLine(lines[0])[0] || '';
-      if (firstCell.trim() && !URL_REGEX.test(firstCell.trim())) start = 1;
+      var firstCell = parseRow(lines[0])[0] || '';
+      if (firstCell && !URL_REGEX.test(firstCell)) start = 1;
     }
     for (var i = start; i < lines.length; i++) {
-      var cells = parseCSVLine(lines[i]);
-      var url = (cells[0] || '').trim();
-      var name = (cells[1] || '').trim();
+      var cells = parseRow(lines[i]);
+      var url = cells[0] || '';
+      var name = cells[1] || '';
       if (!url) continue;
       if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
       entries.push({ url: url, name: name || null });
@@ -157,11 +171,11 @@
     }
   }
 
-  /** Safe filename from user-provided name (column 2). */
+  /** Safe filename from user-provided name (column 2). Always returns a string when input has content. */
   function sanitizeName(name) {
-    if (!name || typeof name !== 'string') return null;
-    var s = name.replace(/[\\/:*?"<>|]/g, '_').replace(/\s+/g, ' ').trim();
-    return s.slice(0, 120) || null;
+    if (name == null) return '';
+    var s = String(name).replace(/[\\/:*?"<>|]/g, '_').replace(/\s+/g, ' ').trim();
+    return s.slice(0, 120);
   }
 
   function getExtension(contentType, url) {
@@ -209,9 +223,9 @@
       }).then(function (blob) {
         var contentType = blob.type || '';
         var ext = getExtension(contentType, url);
-        var base = entry.name && sanitizeName(entry.name)
-          ? sanitizeName(entry.name)
-          : sanitizeFilename(url, i);
+        var rawName = entry.name != null ? String(entry.name).trim() : '';
+        var base = rawName ? sanitizeName(rawName) : sanitizeFilename(url, i);
+        if (!base) base = sanitizeFilename(url, i);
         if (!base.endsWith(ext)) base += ext;
         row.filename = base;
         zip.file(base, blob);
