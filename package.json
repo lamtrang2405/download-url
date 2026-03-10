@@ -1,0 +1,19 @@
+{
+  "name": "url-downloader-web",
+  "version": "1.0.0",
+  "description": "Import Excel or paste URLs, download all and get a ZIP",
+  "main": "server.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "archiver": "^7.0.1",
+    "express": "^4.21.0",
+    "multer": "^1.4.5-lts.1",
+    "xlsx": "^0.18.5"
+  }
+}

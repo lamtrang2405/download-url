@@ -1,0 +1,11 @@
+# Render.com — connect your GitHub repo and this will deploy automatically
+# Free tier: https://dashboard.render.com
+services:
+  - type: web
+    name: url-downloader
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 20

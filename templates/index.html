@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>URL Downloader — Import sheet or links</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f0f12;
+      --surface: #18181c;
+      --border: #2a2a30;
+      --text: #e4e4e7;
+      --muted: #71717a;
+      --accent: #22d3ee;
+      --accent-hover: #67e8f9;
+      --success: #4ade80;
+      --error: #f87171;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+    }
+    .container {
+      width: 100%;
+      max-width: 560px;
+    }
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin: 0 0 0.5rem;
+      letter-spacing: -0.02em;
+    }
+    .sub {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 2rem;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .card h2 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin: 0 0 0.75rem;
+    }
+    label {
+      display: block;
+      font-size: 0.9rem;
+      margin-bottom: 0.35rem;
+      color: var(--muted);
+    }
+    input[type="file"] {
+      width: 100%;
+      padding: 0.75rem;
+      background: var(--bg);
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: inherit;
+      cursor: pointer;
+    }
+    input[type="file"]::file-selector-button {
+      margin-right: 0.75rem;
+      padding: 0.4rem 0.75rem;
+      background: var(--border);
+      border: 0;
+      border-radius: 6px;
+      color: var(--text);
+      font-family: inherit;
+      cursor: pointer;
+    }
+    textarea {
+      width: 100%;
+      min-height: 140px;
+      padding: 0.75rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      resize: vertical;
+    }
+    textarea::placeholder {
+      color: var(--muted);
+    }
+    .row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+    .row:last-of-type { margin-bottom: 0; }
+    .field {
+      flex: 1;
+      min-width: 120px;
+    }
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      padding: 0.6rem 0.75rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .btn {
+      width: 100%;
+      padding: 0.9rem 1.25rem;
+      margin-top: 0.5rem;
+      background: var(--accent);
+      color: var(--bg);
+      border: none;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn:hover {
+      background: var(--accent-hover);
+    }
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .divider {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.8rem;
+      margin: 0.75rem 0;
+    }
+    .flashes {
+      margin-bottom: 1.25rem;
+    }
+    .flash {
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+    .flash.success { background: rgba(74, 222, 128, 0.15); color: var(--success); }
+    .flash.error { background: rgba(248, 113, 113, 0.15); color: var(--error); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>URL Downloader</h1>
+    <p class="sub">Import an Excel sheet or paste links — we’ll download everything and give you a ZIP.</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flashes">
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <form method="post" action="/" enctype="multipart/form-data">
+      <div class="card">
+        <h2>From Excel</h2>
+        <label for="excel_file">Upload .xlsx (column with URLs will be auto-detected)</label>
+        <input type="file" id="excel_file" name="excel_file" accept=".xlsx,.xls">
+        <div class="row" style="margin-top: 1rem;">
+          <div class="field">
+            <label for="url_column">URL column (optional)</label>
+            <input type="text" id="url_column" name="url_column" placeholder="e.g. Link">
+          </div>
+          <div class="field">
+            <label for="sheet_name">Sheet</label>
+            <input type="text" id="sheet_name" name="sheet_name" placeholder="0 or name" value="0">
+          </div>
+        </div>
+      </div>
+
+      <div class="divider">or</div>
+
+      <div class="card">
+        <h2>Paste URLs</h2>
+        <label for="paste_urls">One URL per line (or we’ll detect links in the text)</label>
+        <textarea id="paste_urls" name="paste_urls" placeholder="https://example.com/file1.pdf&#10;https://example.com/file2.xlsx"></textarea>
+      </div>
+
+      <div class="card">
+        <label for="timeout">Timeout per URL (seconds)</label>
+        <input type="number" id="timeout" name="timeout" value="30" min="10" max="120" style="max-width: 100px;">
+      </div>
+
+      <button type="submit" class="btn">Start download</button>
+    </form>
+  </div>
+</body>
+</html>
