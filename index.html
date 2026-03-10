@@ -170,10 +170,10 @@
     </form>
   </div>
 
-  <!-- Load libs from jsDelivr (no integrity = works when CDN cache varies) -->
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js" crossorigin="anonymous"></script>
+  <!-- Libs self-hosted in repo (no CDN = works everywhere) -->
+  <script src="vendor/xlsx.full.min.js"></script>
+  <script src="vendor/jszip.min.js"></script>
+  <script src="vendor/FileSaver.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
