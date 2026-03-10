@@ -131,7 +131,7 @@
 <body>
   <div class="container">
     <h1>URL Downloader</h1>
-    <p class="sub">Import an Excel sheet or paste links — downloads run in your browser and you get a ZIP. No server needed.</p>
+    <p class="sub">Import CSV/Excel (Column 1 = URL, Column 2 = filename) or paste links. Supports mp3, mp4, txt, jpg, png and more. No server needed.</p>
 
     <div id="message" class="hidden" role="alert"></div>
 
@@ -159,7 +159,7 @@
       <div class="card">
         <label for="timeout">Timeout per URL (seconds)</label>
         <input type="number" id="timeout" value="30" min="10" max="120" style="max-width: 100px;" />
-        <p class="hint">Note: Some sites may block downloads from browser scripts (CORS or auth).</p>
+        <p class="hint">Works with mp3, mp4, txt, jpg, png, pdf, etc. Some sites may block downloads (CORS).</p>
       </div>
 
       <button type="submit" class="btn" id="submitBtn">Start download</button>

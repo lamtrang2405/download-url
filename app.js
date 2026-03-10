@@ -190,7 +190,12 @@
       'image/jpeg': '.jpg',
       'image/png': '.png',
       'image/gif': '.gif',
-      'image/webp': '.webp'
+      'image/webp': '.webp',
+      'audio/mpeg': '.mp3',
+      'audio/mp3': '.mp3',
+      'audio/mp4': '.m4a',
+      'video/mp4': '.mp4',
+      'video/x-m4v': '.m4v'
     };
     var ct = (contentType || '').split(';')[0].trim();
     if (map[ct]) return map[ct];
