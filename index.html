@@ -5,11 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>URL Downloader — Import sheet or links, get a ZIP</title>
 
-  <!-- Excel parsing + ZIP in the browser (no backend) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" integrity="sha512-0hK7ShfPY3Mmdf6w+YieMO1aTYbNMm0noTGkcvdc6mFkUNN+1PQWgjkZjqx1B0J6Hh1N44Ciprcy4qH+uIXqTQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" integrity="sha512-9H4pZKkNC98t5a0xwkC6d6Jy0gXEKq6kboWwH8nRQgx4LiXfbX2B00kWTlvOPxm8b3PUVceR9WqL4lqQ37Y3wQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js" integrity="sha512-bG5Jf5p4a3kLwY6UKiQCNF9Cw2nVfQqD1nvLNrQ9UPU7eYg3fnGvWQ6N5LQyU5G6vT1pO9GuN1xC4T6k7Qkz9g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
   <style>
     :root {
       --bg: #0f0f12;
@@ -175,6 +170,10 @@
     </form>
   </div>
 
+  <!-- Load libs from jsDelivr (no integrity = works when CDN cache varies) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js" crossorigin="anonymous"></script>
   <script src="app.js"></script>
 </body>
 </html>
