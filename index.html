@@ -1,50 +1,370 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>URL Downloader — Import sheet or links, get a ZIP</title>
+
+  <!-- Excel parsing + ZIP in the browser (no backend) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" integrity="sha512-0hK7ShfPY3Mmdf6w+YieMO1aTYbNMm0noTGkcvdc6mFkUNN+1PQWgjkZjqx1B0J6Hh1N44Ciprcy4qH+uIXqTQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" integrity="sha512-9H4pZKkNC98t5a0xwkC6d6Jy0gXEKq6kboWwH8nRQgx4LiXfbX2B00kWTlvOPxm8b3PUVceR9WqL4lqQ37Y3wQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js" integrity="sha512-bG5Jf5p4a3kLwY6UKiQCNF9Cw2nVfQqD1nvLNrQ9UPU7eYg3fnGvWQ6N5LQyU5G6vT1pO9GuN1xC4T6k7Qkz9g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
   <style>
+    :root {
+      --bg: #0f0f12;
+      --surface: #18181c;
+      --border: #2a2a30;
+      --text: #e4e4e7;
+      --muted: #71717a;
+      --accent: #22d3ee;
+      --accent-hover: #67e8f9;
+      --success: #4ade80;
+      --error: #f87171;
+    }
     * { box-sizing: border-box; }
     body {
       margin: 0;
       min-height: 100vh;
       font-family: system-ui, -apple-system, sans-serif;
-      background: #0f0f12;
-      color: #e4e4e7;
+      background: var(--bg);
+      color: var(--text);
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 2rem;
-      text-align: center;
+      padding: 2rem 1rem;
     }
-    .card {
-      max-width: 420px;
-      padding: 2rem;
-    }
-    h1 { font-size: 1.75rem; margin: 0 0 0.5rem; }
-    p { color: #71717a; margin: 0 0 1.5rem; line-height: 1.5; }
-    .btn {
-      display: inline-block;
-      padding: 0.85rem 1.5rem;
-      background: #22d3ee;
-      color: #0f0f12;
-      text-decoration: none;
+    .container { width: 100%; max-width: 560px; }
+    h1 {
+      font-size: 1.75rem;
       font-weight: 600;
+      margin: 0 0 0.5rem;
+      letter-spacing: -0.02em;
+    }
+    .sub { color: var(--muted); font-size: 0.95rem; margin-bottom: 2rem; }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .card h2 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin: 0 0 0.75rem;
+    }
+    label { display: block; font-size: 0.9rem; margin-bottom: 0.35rem; color: var(--muted); }
+    input[type="file"] {
+      width: 100%;
+      padding: 0.75rem;
+      background: var(--bg);
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: inherit;
+      cursor: pointer;
+    }
+    input[type="file"]::file-selector-button {
+      margin-right: 0.75rem;
+      padding: 0.4rem 0.75rem;
+      background: var(--border);
+      border: 0;
+      border-radius: 6px;
+      color: var(--text);
+      font-family: inherit;
+      cursor: pointer;
+    }
+    textarea {
+      width: 100%;
+      min-height: 140px;
+      padding: 0.75rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: monospace;
+      font-size: 0.85rem;
+      resize: vertical;
+    }
+    textarea::placeholder { color: var(--muted); }
+    .row { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .row:last-of-type { margin-bottom: 0; }
+    .field { flex: 1; min-width: 120px; }
+    input[type="text"], input[type="number"] {
+      width: 100%;
+      padding: 0.6rem 0.75rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+    .btn {
+      width: 100%;
+      padding: 0.9rem 1.25rem;
+      margin-top: 0.5rem;
+      background: var(--accent);
+      color: var(--bg);
+      border: none;
       border-radius: 10px;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
       transition: background 0.15s;
     }
-    .btn:hover { background: #67e8f9; }
-    .muted { font-size: 0.85rem; color: #52525b; margin-top: 1.5rem; }
-    .muted a { color: #22d3ee; }
+    .btn:hover { background: var(--accent-hover); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .divider { text-align: center; color: var(--muted); font-size: 0.8rem; margin: 0.75rem 0; }
+    #message {
+      margin-bottom: 1.25rem;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+    #message.success { background: rgba(74, 222, 128, 0.15); color: var(--success); }
+    #message.error { background: rgba(248, 113, 113, 0.15); color: var(--error); }
+    #message.hidden { display: none; }
+    .hint { font-size: 0.8rem; color: var(--muted); margin-top: 0.5rem; }
   </style>
 </head>
 <body>
-  <div class="card">
+  <div class="container">
     <h1>URL Downloader</h1>
-    <p>Import an Excel sheet or paste URL links. The app downloads everything and gives you a single ZIP.</p>
-    <a href="https://render.com/deploy?repo=https://github.com/lamtrang2405/download-url" class="btn">Deploy free on Render →</a>
-    <p class="muted">One click to get your own live app. No credit card. <a href="https://github.com/lamtrang2405/download-url">Source on GitHub</a></p>
+    <p class="sub">Import an Excel sheet or paste links — downloads run in your browser and you get a ZIP. No server needed.</p>
+
+    <div id="message" class="hidden" role="alert"></div>
+
+    <form id="form">
+      <div class="card">
+        <h2>From Excel</h2>
+        <label for="excel_file">Upload .xlsx (column with URLs will be auto-detected)</label>
+        <input type="file" id="excel_file" accept=".xlsx,.xls" />
+        <div class="row" style="margin-top: 1rem;">
+          <div class="field">
+            <label for="url_column">URL column (optional)</label>
+            <input type="text" id="url_column" placeholder="e.g. Link" />
+          </div>
+          <div class="field">
+            <label for="sheet_name">Sheet</label>
+            <input type="text" id="sheet_name" placeholder="0 or name" value="0" />
+          </div>
+        </div>
+      </div>
+
+      <div class="divider">or</div>
+
+      <div class="card">
+        <h2>Paste URLs</h2>
+        <label for="paste_urls">One URL per line (or we’ll detect links in the text)</label>
+        <textarea id="paste_urls" placeholder="https://example.com/file1.pdf&#10;https://example.com/file2.xlsx"></textarea>
+      </div>
+
+      <div class="card">
+        <label for="timeout">Timeout per URL (seconds)</label>
+        <input type="number" id="timeout" value="30" min="10" max="120" style="max-width: 100px;" />
+        <p class="hint">Note: Some sites may block downloads from browser scripts (CORS or auth).</p>
+      </div>
+
+      <button type="submit" class="btn" id="submitBtn">Start download</button>
+    </form>
   </div>
+
+  <script>
+    const URL_REGEX = /^https?:\\/\\//i;
+    const URL_IN_TEXT = /https?:\\/\\/[^\\s]+/g;
+
+    function showMessage(text, type) {
+      const el = document.getElementById('message');
+      el.textContent = text;
+      el.className = type;
+      el.classList.remove('hidden');
+    }
+    function hideMessage() {
+      const el = document.getElementById('message');
+      el.classList.add('hidden');
+    }
+
+    function extractUrlsFromText(text) {
+      const urls = [];
+      const seen = new Set();
+      text.split(/\\r?\\n/).forEach(line => {
+        const matches = line.match(URL_IN_TEXT) || [];
+        matches.forEach(u => {
+          const url = u.replace(/[.,;:)]+$/, '').trim();
+          if (url && !seen.has(url)) {
+            seen.add(url);
+            urls.push(url);
+          }
+        });
+      });
+      return urls;
+    }
+
+    function extractUrlsFromExcel(buffer, urlColumn, sheetName) {
+      const workbook = XLSX.read(buffer, { type: 'array' });
+      const sheetNameResolved = (typeof sheetName === 'number')
+        ? workbook.SheetNames[sheetName]
+        : sheetName;
+      const sheet = workbook.Sheets[sheetNameResolved || workbook.SheetNames[0]];
+      if (!sheet) throw new Error('Sheet not found');
+      const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+      if (!rows.length) return [];
+      const header = rows[0].map(String);
+      let colIndex = -1;
+      if (urlColumn) {
+        const target = urlColumn.trim().toLowerCase();
+        colIndex = header.findIndex(h => h.trim().toLowerCase() === target);
+        if (colIndex === -1) {
+          throw new Error('Column \"' + urlColumn + '\" not found. Available: ' + header.join(', '));
+        }
+      } else {
+        for (let i = 0; i < header.length; i++) {
+          const sample = rows.slice(1, 21).map(r => String(r[i] || '').trim());
+          if (sample.some(s => URL_REGEX.test(s))) {
+            colIndex = i;
+            break;
+          }
+        }
+        if (colIndex === -1) throw new Error('No column with URLs found. Specify the URL column name.');
+      }
+      const urls = [];
+      const seen = new Set();
+      for (let i = 1; i < rows.length; i++) {
+        const val = String(rows[i][colIndex] ?? '').trim();
+        if (URL_REGEX.test(val) && !seen.has(val)) {
+          seen.add(val);
+          urls.push(val);
+        }
+      }
+      return urls;
+    }
+
+    function sanitizeFilename(url, index) {
+      try {
+        const u = new URL(url);
+        let name = (u.hostname || 'download') + (u.pathname || '').replace(/^\\//, '').replace(/\\//g, '_');
+        name = name.replace(/[^\\w\\-_.]/g, '_').slice(0, 80) || ('download_' + index);
+        return name;
+      } catch {
+        return 'download_' + index;
+      }
+    }
+
+    function getExtension(contentType, url) {
+      const map = {
+        'application/json': '.json',
+        'text/html': '.html',
+        'text/plain': '.txt',
+        'text/csv': '.csv',
+        'application/xml': '.xml',
+        'text/xml': '.xml',
+        'application/pdf': '.pdf',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': '.xlsx',
+        'application/vnd.ms-excel': '.xls',
+      };
+      const ct = (contentType || '').split(';')[0].trim();
+      if (map[ct]) return map[ct];
+      const p = url.split('?')[0];
+      const m = p.match(/\\.([a-z0-9]+)$/i);
+      return m ? '.' + m[1].toLowerCase() : '.bin';
+    }
+
+    async function downloadAll(urls, timeoutSec, zip) {
+      const timeoutMs = Math.min(120, Math.max(10, timeoutSec)) * 1000;
+      const results = [];
+
+      for (let i = 0; i < urls.length; i++) {
+        const url = urls[i];
+        const row = { url, status: 'pending', error: '', filename: '' };
+        try {
+          const controller = new AbortController();
+          const to = setTimeout(() => controller.abort(), timeoutMs);
+          const res = await fetch(url, {
+            signal: controller.signal,
+            headers: { 'User-Agent': 'URL-Downloader-Browser' },
+          });
+          clearTimeout(to);
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const blob = await res.blob();
+          const contentType = res.headers.get('Content-Type') || blob.type || '';
+          const ext = getExtension(contentType, url);
+          let base = sanitizeFilename(url, i);
+          if (!base.endsWith(ext)) base += ext;
+          row.filename = base;
+          zip.file(base, blob);
+          row.status = 'ok';
+        } catch (err) {
+          row.status = 'error';
+          row.error = err.message || String(err);
+        }
+        results.push(row);
+      }
+      return results;
+    }
+
+    document.getElementById('form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideMessage();
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+
+      const fileInput = document.getElementById('excel_file');
+      const pasteText = document.getElementById('paste_urls').value.trim();
+      let urls = [];
+
+      try {
+        // Excel first
+        if (fileInput.files.length) {
+          const file = fileInput.files[0];
+          const buf = await file.arrayBuffer();
+          let sheetName = document.getElementById('sheet_name').value.trim() || '0';
+          if (/^\\d+$/.test(sheetName)) sheetName = parseInt(sheetName, 10);
+          urls = extractUrlsFromExcel(
+            buf,
+            document.getElementById('url_column').value.trim() || null,
+            sheetName
+          );
+        }
+
+        // Fallback to pasted URLs
+        if (!urls.length && pasteText) {
+          urls = extractUrlsFromText(pasteText);
+        }
+
+        if (!urls.length) {
+          showMessage('Please upload an Excel file with URLs or paste URLs.', 'error');
+          return;
+        }
+
+        const timeout = parseInt(document.getElementById('timeout').value, 10) || 30;
+        const zip = new JSZip();
+        const results = await downloadAll(urls, timeout, zip);
+
+        // Add summary CSV
+        const header = 'url,filename,status,error\\n';
+        const lines = results.map(r => {
+          const esc = (v) => ('\"' + String(v || '').replace(/\"/g, '\"\"') + '\"');
+          return [esc(r.url), esc(r.filename), esc(r.status), esc(r.error)].join(',');
+        });
+        zip.file('download_summary.csv', header + lines.join('\\n'));
+
+        const blob = await zip.generateAsync({ type: 'blob' });
+        saveAs(blob, 'downloaded_urls.zip');
+
+        const ok = results.filter(r => r.status === 'ok').length;
+        showMessage('Done: ' + ok + ' of ' + urls.length + ' URLs downloaded. ZIP is downloading.', 'success');
+      } catch (err) {
+        showMessage(err.message || 'Unexpected error.', 'error');
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
 </body>
 </html>

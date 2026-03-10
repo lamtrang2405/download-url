@@ -1,43 +1,36 @@
-# URL Downloader — Web app (no Python)
+# URL Downloader — GitHub Pages app (no backend)
 
-Import an Excel sheet or paste URL links; the app downloads everything and gives you a single ZIP. **Runs with Node.js only** (no Python).
+Import an Excel sheet or paste URL links; the app downloads everything **directly in your browser** and gives you a single ZIP.  
+No Python, no Node server — pure static site, perfect for **GitHub Pages**.
 
 **Repo:** [github.com/lamtrang2405/download-url](https://github.com/lamtrang2405/download-url)
 
-## GitHub Pages (landing page)
+## Use it on GitHub Pages
 
-To turn on the landing page at **https://lamtrang2405.github.io/download-url/**:
+The main app is `index.html` at the repo root. To host it at:
+
+> **https://lamtrang2405.github.io/download-url/**
 
 1. Open the repo → **Settings** → **Pages**.
 2. Under **Build and deployment**, set **Source** to **Deploy from a branch**.
 3. Branch: **main**, Folder: **/ (root)** → **Save**.
-4. After a minute, the page will be live with a “Deploy free on Render” button.
+4. Wait ~1–2 minutes. Then open `https://lamtrang2405.github.io/download-url/`.
 
-## Get a live app URL (the actual downloader)
+On that page you can:
 
-See **[HOSTING.md](HOSTING.md)** for the shortest way to get a public URL:
+- Upload a `.xlsx` file (the URL column is auto-detected, or you can specify it).
+- Or paste URLs (one per line).
+- Click **Start download** → the browser fetches each URL and downloads `downloaded_urls.zip` (includes `download_summary.csv`).
 
-- **Render** or **Replit** (free): push this folder to GitHub, then connect the repo — you get a link like `https://your-app.onrender.com`.
-- **Local only:** run `npm install` and `npm start`, then open **http://localhost:5000**.
+> Note: Some URLs may fail because of **CORS** or authentication – that’s a browser limitation, not GitHub Pages.
 
-## Run locally
+## Optional: run locally
 
-```bash
-npm install
-npm start
-```
+You can still run the Node or Python versions locally if you want:
 
-Open **http://localhost:5000**. Upload a `.xlsx` file (with a column of URLs) or paste URLs in the text area, then click **Start download**. Your browser will get `downloaded_urls.zip` with all files and a `download_summary.csv`.
-
----
-
-## Optional: Python command-line script
-
-If you prefer the CLI with Python:
-
-```bash
-pip install -r requirements.txt
-python download_from_excel_urls.py "path/to/urls.xlsx"
-```
-
-See the script’s `--help` for options (e.g. `-c` URL column, `-o` output dir, `-s` sheet).
+- Node: `npm install` then `npm start`, open `http://localhost:5000`.
+- Python CLI:  
+  ```bash
+  pip install -r requirements.txt
+  python download_from_excel_urls.py "path/to/urls.xlsx"
+  ```
