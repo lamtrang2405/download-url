@@ -366,6 +366,74 @@
         showMessage(err.message || 'Unexpected error.', 'error');
       }).then(done);
     }
+
+    function switchTab(panelId) {
+      var panels = document.querySelectorAll('.panel');
+      var tabs = document.querySelectorAll('.tabs button');
+      panels.forEach(function (p) {
+        p.classList.toggle('active', p.id === panelId);
+      });
+      tabs.forEach(function (t) {
+        var isActive = (t.id === 'tab-download' && panelId === 'panel-download') ||
+          (t.id === 'tab-txt2md' && panelId === 'panel-txt2md');
+        t.classList.toggle('active', isActive);
+        t.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      });
+    }
+
+    document.getElementById('tab-download').addEventListener('click', function () {
+      switchTab('panel-download');
+    });
+    document.getElementById('tab-txt2md').addEventListener('click', function () {
+      switchTab('panel-txt2md');
+    });
+
+    var txt2mdBtn = document.getElementById('txt2mdBtn');
+    var txtFilesInput = document.getElementById('txt_files');
+    if (txt2mdBtn && txtFilesInput) {
+      txt2mdBtn.addEventListener('click', function () {
+        var files = txtFilesInput.files;
+        if (!files || files.length === 0) {
+          showMessage('Please select one or more .txt files.', 'error');
+          return;
+        }
+        if (typeof JSZip === 'undefined' || typeof saveAs === 'undefined') {
+          showMessage('Scripts failed to load.', 'error');
+          return;
+        }
+        txt2mdBtn.disabled = true;
+        showMessage('Converting ' + files.length + ' file(s)...', 'success');
+        var zip = new JSZip();
+        var done = 0;
+        function next(i) {
+          if (i >= files.length) {
+            zip.generateAsync({ type: 'blob' }).then(function (blob) {
+              saveAs(blob, 'txt-to-md.zip');
+              showMessage('Done. ' + files.length + ' file(s) converted to .md in ZIP.', 'success');
+            }).catch(function (err) {
+              showMessage(err.message || 'Failed to create ZIP.', 'error');
+            }).then(function () {
+              txt2mdBtn.disabled = false;
+            });
+            return;
+          }
+          var file = files[i];
+          var base = file.name.replace(/\.txt$/i, '');
+          if (!base) base = 'file_' + i;
+          var reader = new FileReader();
+          reader.onload = function () {
+            zip.file(base + '.md', reader.result);
+            next(i + 1);
+          };
+          reader.onerror = function () {
+            zip.file(base + '.md', '[read error]');
+            next(i + 1);
+          };
+          reader.readAsText(file, 'UTF-8');
+        }
+        next(0);
+      });
+    }
   }
 
   if (document.readyState === 'loading') {

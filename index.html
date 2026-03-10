@@ -126,15 +126,43 @@
     #message.error { background: rgba(248, 113, 113, 0.15); color: var(--error); }
     #message.hidden { display: none; }
     .hint { font-size: 0.8rem; color: var(--muted); margin-top: 0.5rem; }
+    .tabs {
+      display: flex;
+      gap: 0.25rem;
+      margin-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .tabs button {
+      padding: 0.6rem 1rem;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      margin-bottom: -1px;
+    }
+    .tabs button:hover { color: var(--text); }
+    .tabs button.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .panel { display: none; }
+    .panel.active { display: block; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>URL Downloader</h1>
-    <p class="sub">Import CSV/Excel (Column 1 = URL, Column 2 = filename) or paste links. Supports mp3, mp4, txt, jpg, png and more. No server needed.</p>
+    <h1>URL Downloader &amp; Tools</h1>
+    <p class="sub">Download from URLs (CSV/Excel) or convert TXT files to Markdown.</p>
+
+    <div class="tabs" role="tablist">
+      <button type="button" id="tab-download" role="tab" aria-selected="true" class="active">Download URLs</button>
+      <button type="button" id="tab-txt2md" role="tab" aria-selected="false">TXT to MD</button>
+    </div>
 
     <div id="message" class="hidden" role="alert"></div>
 
+    <div id="panel-download" class="panel active" role="tabpanel">
     <form id="form">
       <div class="card">
         <h2>From CSV or Excel</h2>
@@ -164,6 +192,17 @@
 
       <button type="submit" class="btn" id="submitBtn">Start download</button>
     </form>
+    </div>
+
+    <div id="panel-txt2md" class="panel" role="tabpanel">
+      <div class="card">
+        <h2>TXT to Markdown</h2>
+        <label for="txt_files">Select multiple .txt files to convert to .md (same content, .md extension)</label>
+        <input type="file" id="txt_files" accept=".txt" multiple />
+        <p class="hint">Each file will be saved as the same name with .md extension in a ZIP.</p>
+      </div>
+      <button type="button" class="btn" id="txt2mdBtn">Convert to MD and download ZIP</button>
+    </div>
   </div>
 
   <!-- Libs self-hosted in repo (no CDN = works everywhere) -->
