@@ -193,15 +193,23 @@
     function extractUrlsFromText(text) {
       const urls = [];
       const seen = new Set();
+      const add = (raw) => {
+        let url = raw.replace(/[.,;:)]+$/, '').trim();
+        if (!url) return;
+        if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+        if (!seen.has(url)) {
+          seen.add(url);
+          urls.push(url);
+        }
+      };
       text.split(/\r?\n/).forEach(line => {
         const matches = line.match(URL_IN_TEXT) || [];
-        matches.forEach(u => {
-          const url = u.replace(/[.,;:)]+$/, '').trim();
-          if (url && !seen.has(url)) {
-            seen.add(url);
-            urls.push(url);
-          }
-        });
+        if (matches.length) {
+          matches.forEach(add);
+        } else {
+          const trimmed = line.trim();
+          if (trimmed && /^[a-z0-9][-a-z0-9.]*\.[a-z]{2,}/i.test(trimmed)) add(trimmed);
+        }
       });
       return urls;
     }
@@ -248,8 +256,8 @@
     function sanitizeFilename(url, index) {
       try {
         const u = new URL(url);
-        let name = (u.hostname || 'download') + (u.pathname || '').replace(/^\\//, '').replace(/\\//g, '_');
-        name = name.replace(/[^\\w\\-_.]/g, '_').slice(0, 80) || ('download_' + index);
+        let name = (u.hostname || 'download') + (u.pathname || '').replace(/^\//, '').replace(/\//g, '_');
+        name = name.replace(/[^\w\-_.]/g, '_').slice(0, 80) || ('download_' + index);
         return name;
       } catch {
         return 'download_' + index;
@@ -271,8 +279,8 @@
       const ct = (contentType || '').split(';')[0].trim();
       if (map[ct]) return map[ct];
       const p = url.split('?')[0];
-      const m = p.match(/\\.([a-z0-9]+)$/i);
-      return m ? '.' + m[1].toLowerCase() : '.bin';
+      const m = p.match(/\.[a-z0-9]+$/i);
+      return m ? m[0].toLowerCase() : '.bin';
     }
 
     async function downloadAll(urls, timeoutSec, zip) {
@@ -314,6 +322,12 @@
       const submitBtn = document.getElementById('submitBtn');
       submitBtn.disabled = true;
 
+      if (typeof JSZip === 'undefined' || typeof saveAs === 'undefined') {
+        showMessage('Scripts failed to load. Check your connection and try again.', 'error');
+        submitBtn.disabled = false;
+        return;
+      }
+
       const fileInput = document.getElementById('excel_file');
       const pasteText = document.getElementById('paste_urls').value.trim();
       let urls = [];
@@ -324,7 +338,7 @@
           const file = fileInput.files[0];
           const buf = await file.arrayBuffer();
           let sheetName = document.getElementById('sheet_name').value.trim() || '0';
-          if (/^\\d+$/.test(sheetName)) sheetName = parseInt(sheetName, 10);
+          if (/^\d+$/.test(sheetName)) sheetName = parseInt(sheetName, 10);
           urls = extractUrlsFromExcel(
             buf,
             document.getElementById('url_column').value.trim() || null,
@@ -338,9 +352,12 @@
         }
 
         if (!urls.length) {
-          showMessage('Please upload an Excel file with URLs or paste URLs.', 'error');
+          showMessage('No URLs found. Paste one URL per line (e.g. https://example.com/file.pdf).', 'error');
+          submitBtn.disabled = false;
           return;
         }
+
+        showMessage('Downloading ' + urls.length + ' link(s)...', 'success');
 
         const timeout = parseInt(document.getElementById('timeout').value, 10) || 30;
         const zip = new JSZip();
@@ -358,7 +375,7 @@
         saveAs(blob, 'downloaded_urls.zip');
 
         const ok = results.filter(r => r.status === 'ok').length;
-        showMessage('Done: ' + ok + ' of ' + urls.length + ' URLs downloaded. ZIP is downloading.', 'success');
+        showMessage('Done: ' + ok + ' of ' + urls.length + ' downloaded. ZIP saved.', 'success');
       } catch (err) {
         showMessage(err.message || 'Unexpected error.', 'error');
       } finally {
