@@ -137,16 +137,12 @@
 
     <form id="form">
       <div class="card">
-        <h2>From Excel</h2>
-        <label for="excel_file">Upload .xlsx (column with URLs will be auto-detected)</label>
-        <input type="file" id="excel_file" accept=".xlsx,.xls" />
+        <h2>From CSV or Excel</h2>
+        <label for="excel_file">Upload file: <strong>Column 1 = URL</strong>, <strong>Column 2 = filename</strong> (e.g. AlphaKillian 0)</label>
+        <input type="file" id="excel_file" accept=".csv,.xlsx,.xls" />
         <div class="row" style="margin-top: 1rem;">
           <div class="field">
-            <label for="url_column">URL column (optional)</label>
-            <input type="text" id="url_column" placeholder="e.g. Link" />
-          </div>
-          <div class="field">
-            <label for="sheet_name">Sheet</label>
+            <label for="sheet_name">Sheet (Excel only)</label>
             <input type="text" id="sheet_name" placeholder="0 or name" value="0" />
           </div>
         </div>
