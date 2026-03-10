@@ -176,8 +176,8 @@
   </div>
 
   <script>
-    const URL_REGEX = /^https?:\\/\\//i;
-    const URL_IN_TEXT = /https?:\\/\\/[^\\s]+/g;
+    const URL_REGEX = /^https?:\/\//i;
+    const URL_IN_TEXT = /https?:\/\/[^\s]+/g;
 
     function showMessage(text, type) {
       const el = document.getElementById('message');
@@ -193,7 +193,7 @@
     function extractUrlsFromText(text) {
       const urls = [];
       const seen = new Set();
-      text.split(/\\r?\\n/).forEach(line => {
+      text.split(/\r?\n/).forEach(line => {
         const matches = line.match(URL_IN_TEXT) || [];
         matches.forEach(u => {
           const url = u.replace(/[.,;:)]+$/, '').trim();
@@ -347,12 +347,12 @@
         const results = await downloadAll(urls, timeout, zip);
 
         // Add summary CSV
-        const header = 'url,filename,status,error\\n';
+        const header = 'url,filename,status,error\n';
         const lines = results.map(r => {
-          const esc = (v) => ('\"' + String(v || '').replace(/\"/g, '\"\"') + '\"');
+          const esc = (v) => ('"' + String(v || '').replace(/"/g, '""') + '"');
           return [esc(r.url), esc(r.filename), esc(r.status), esc(r.error)].join(',');
         });
-        zip.file('download_summary.csv', header + lines.join('\\n'));
+        zip.file('download_summary.csv', header + lines.join('\n'));
 
         const blob = await zip.generateAsync({ type: 'blob' });
         saveAs(blob, 'downloaded_urls.zip');
